@@ -63,6 +63,6 @@ curl -X GET "http://127.0.0.1:5001/cms-count/us-central1/access?worldid=dummy-wo
 curl -X GET "https://access-754xomgh3q-uc.a.run.app?worldid=dummy-worldid&identifier=dummy-identifier&cmd=reset"
 
 # レスポンス
-# 数字が加算された MP4動画 にリダイレクトされる
+# 数字が加算された MP4動画 が返却される
 ```
 
