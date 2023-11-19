@@ -24,7 +24,8 @@ const tmpdir = os.tmpdir();
 import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
-import {createCanvas} from "canvas";
+import {createCanvas, registerFont} from "canvas";
+
 import * as ffmpeg from "fluent-ffmpeg";
 import * as ffmpegPath from "@ffmpeg-installer/ffmpeg";
 
@@ -58,9 +59,37 @@ const ffmpegImageToVideo = async (inputFile: string, outputFile: string) => {
   });
 };
 
+// Fontをバケットからダウンロードする
+// FONT_FILE.family が null の場合は、ダウンロードしない "sans-serif" にする
+const FONT_FILE = {
+  path: "fonts/DSEG7-Classic/DSEG7Classic-Bold.ttf",
+  family: "DSEG7Classic-Bold",
+};
+
+const downloadFont = async (fontPath: string) => {
+  const bucket = admin.storage().bucket();
+  const fontFile = bucket.file(fontPath);
+  const tempFilePath = path.join(tmpdir, path.basename(fontPath));
+  // tempFilePath が存在する場合はダウンロードしない
+  if (fs.existsSync(tempFilePath)) {
+    return tempFilePath;
+  }
+  await fontFile.download({destination: tempFilePath});
+  return tempFilePath;
+};
+
 // count 数字入りの画像を生成する
-const createCountImage = (count: number, size: number, backgroundColor: string, fontColor: string, templateText: string) => {
-  const canvas = createCanvas(size, size);
+const createCountImage = async (count: number, size: number, backgroundColor: string, fontColor: string, templateText: string) => {
+  // フォントをダウンロードして設定する
+  if (FONT_FILE.path != null) {
+    const fontFilePath = await downloadFont(FONT_FILE.path);
+    console.log("fontFilePath", fontFilePath);
+    registerFont(fontFilePath, {family: FONT_FILE.family});
+  } else {
+    FONT_FILE.family = "sans-serif";
+  }
+
+  const canvas = createCanvas(size, size/2);
   const ctx = canvas.getContext("2d");
   ctx.fillStyle = `#${backgroundColor}`;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -88,7 +117,7 @@ const createCountImage = (count: number, size: number, backgroundColor: string, 
 
   // 中央に文字を表示する
   ctx.fillStyle = `#${fontColor}`;
-  ctx.font = `bold ${fontSize}px sans-serif`;
+  ctx.font = `bold ${fontSize}px "${FONT_FILE.family}"`;
   ctx.textAlign = "center";
   ctx.fillText(value, centerX, centerY + fontSize / 3);
   const buffer = canvas.toBuffer("image/png");
@@ -104,42 +133,14 @@ const saveTmpImage = (buffer: Buffer) => {
   fs.writeFileSync(filePath, buffer);
   return filePath;
 };
-/*
-// MP4動画をstorageに保存する
-const saveStorageMp4 = async (worldid: string, identifier: string, path: string) => {
-  // path のファイルを読み込む
-  const buffer = fs.readFileSync(path);
 
-  // ワーリドIDのバケットにMP$を保存する
-  const bucket = storage.bucket();
-  const file = bucket.file(`${worldid}/${identifier}.mp4`);
-  await file.save(buffer, {
-    metadata: {
-      contentType: "video/mp4",
-    },
-  });
-
-  // ダウンロードURLを取得する
-  return await getStorageMp4DownloadURL(worldid, identifier);
-};
-*/
-/*
-const getStorageMp4DownloadURL = async (worldid: string, identifier: string) => {
-  // ワーリドIDのバケットにMP$を保存する
-  const bucket = storage.bucket();
-  const file = bucket.file(`${worldid}/${identifier}.mp4`);
-
-  // ダウンロードURLを取得する
-  return await getDownloadURL(file);
-};
-*/
 // 現在のアクセス回数を取得する
 const getAccessCount = async (worldid: string, identifier: string) => {
   const ref = db.ref(`access/${worldid}/${identifier}/count`);
   return new Promise<number>((resolve, reject) => {
     ref.once("value", (snapshot) => {
       if (snapshot == null) {
-        reject(new Error("snapshot is null"));
+        resolve(0);
         return;
       }
       resolve(snapshot.val());
@@ -164,16 +165,18 @@ const resetAccessCount = async (worldid: string, identifier: string) => {
 };
 
 // 加算前に期限切れかどうかをチェックする
-const ACCESSCOUNT_UP_EXPIRED_SECONDS = 5;
+const ACCESSCOUNT_UP_EXPIRED_SECONDS = 10;
+
 const expiredAccessCount = async (worldid: string, identifier: string) => {
   const ref = db.ref(`access/${worldid}/${identifier}/expired`);
   return new Promise<boolean>((resolve, reject) => {
     ref.once("value", (snapshot) => {
       // 有効期限を取得して、現在時刻と比較する
-      const expired = snapshot?.val();
+      const expired = (snapshot)? snapshot.val() : 0;
       const now = Date.now();
-      if ((snapshot == null) || (expired < now)) {
-        // 期限切れ なので expired を 現在時刻 + 5秒 に更新する
+      console.log("expired", expired - now, ACCESSCOUNT_UP_EXPIRED_SECONDS * 1000);
+      if ((expired == 0) || (expired < now)) {
+        // 期限切れ なので expired を 現在時刻 + n秒 に更新する
         const newExpired = now + ACCESSCOUNT_UP_EXPIRED_SECONDS * 1000;
         ref.set(newExpired);
         resolve(true);
@@ -195,7 +198,13 @@ const saveAccessCount = async (worldid: string, identifier: string) => {
       .then((expired) => {
         if (expired == false) {
           // 期限切れでないので、カウントを加算しない
-          reject(new Error("expired is false"));
+          ref.once("value", (snapshot) => {
+            if (snapshot == null) {
+              resolve(0);
+              return;
+            }
+            resolve(snapshot.val());
+          });
           return;
         }
         // 現在のアクセス回数を取得して インクリメントして返す
@@ -348,7 +357,7 @@ export const access = onRequest(async (request, response) => {
 
   const count = await getAccessCount(worldid, identifier);
   // 画像を生成する
-  const buffer = createCountImage( count, size, backgroundColor, fontColor, templateText);
+  const buffer = await createCountImage( count, size, backgroundColor, fontColor, templateText);
   // 画像をtmpに保存する
   const tmpImagePath = saveTmpImage(buffer);
   // 画像を動画に変換する
