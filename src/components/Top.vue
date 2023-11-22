@@ -51,7 +51,7 @@
 
     <section class="section" id="form_container" v-if="isActiveForm">
       <div class="container">
-        <h1 class="title"><a id="createurl">URLを生成する</a></h1>
+        <h1 class="title">URLを生成する</h1>
         <div class="columns">
           <div class="column">
             <p> CountUpTrigger`を選択してInspectorにある `Video Player コンポーネント` のURL に設定する値 </p>
