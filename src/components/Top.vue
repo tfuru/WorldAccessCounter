@@ -3,28 +3,39 @@
     <section class="section">
       <div class="container">
         <h1 class="title">WorldAccessCounter</h1>
-        <p class="subtitle">
-          cluster ワールド内に設置できるアクセスカウンターです。 Unity製のワールドであれば、どこでも設置可能です。
-        </p>        
+        <p class="subtitle">cluster ワールド内に設置できるアクセスカウンターです。 Unity製のワールドであれば設置可能です</p>        
       </div>
     </section>
-    <section class="section">
+
+    <section class="section" id="nav">
+      <div class="container">
+        <nav class="breadcrumb is-centered" aria-label="breadcrumbs">
+          <ul>
+            <li :class="isActiveSample"><a @click="clickNav('sample')">使い方</a></li>
+            <li :class="isActiveForm"><a @click="clickNav('form')">URLを生成する</a></li>
+            <li :class="isActiveDownload"><a @click="clickNav('download')">ダウンロード</a></li>
+          </ul>
+        </nav>
+      </div>
+    </section>
+
+    <section class="section" id="download_container" v-if="isActiveDownload">
       <div class="container">
         <h1 class="title">ダウンロード</h1>
         <p class="subtitle">
-          <a href="#" target="_blank">AccessCounter.unitypackage</a>
+          <a :href="UNITYPACKAGE_URL" target="_blank">AccessCounter.unitypackage</a>
         </p>        
       </div>
     </section>
 
-    <section class="section" id="sample_seen">
+    <section class="section" id="sample_seen" v-if="isActiveSample">
       <div class="container">
         <h1 class="title">使い方</h1>
         <div class="columns">
           <div class="column">
             <ol>
               <li>Cluster Creater Kit を設置済みのUnityプロジェクトを用意してUnityで開く</li>
-              <li><a href="#" target="_blank">AccessCounter.unitypackage</a> を ダウンロードして プロジェクトにインポートする</li>
+              <li><a :href="UNITYPACKAGE_URL" target="_blank">AccessCounter.unitypackage</a> を ダウンロードして プロジェクトにインポートする</li>
               <li>サンプルシーン `Assets/t_furu/AccessCounter/Scenes/sample` を開く</li>
               <li>Hierarchy に `AccessCounter` があるので階層を開く</li>
               <li>`OnJoinPlayer`を選択してInspectorを見てみる<br/><img src="/img/docs/OnJoinPlayer.png" width="400"></li>
@@ -38,7 +49,7 @@
       </div>
     </section>
 
-    <section class="section" id="form_container">
+    <section class="section" id="form_container" v-if="isActiveForm">
       <div class="container">
         <h1 class="title"><a id="createurl">URLを生成する</a></h1>
         <div class="columns">
@@ -87,10 +98,36 @@ export default defineComponent({
     msg: String,
   },
   setup() {
+    const UNITYPACKAGE_URL = "https://github.com/tfuru/WorldAccessCounter/blob/main/unity/AccessCounter.unitypackage";
     const COUNT_UP_API_URL = 'https://access-754xomgh3q-uc.a.run.app?worldid=[WORLDID]&identifier=[IDENTIFIER]&cmd=up';
     var worldUrl = ref('https://cluster.mu/w/2d1a38f1-9967-4b6f-994a-d00d52637a8e');
     var identifier = ref('');
     var videoPlayerUrl = ref('');
+
+    const isActiveSample = ref("is-active");
+    const isActiveDownload = ref("");
+    const isActiveForm = ref("");
+
+    const clickNav = (value: string) => {
+      console.log('value', value);
+      switch (value) {
+        case "download":
+          isActiveDownload.value = "is-active";
+          isActiveSample.value = "";
+          isActiveForm.value = "";
+          break;
+        case "sample":
+          isActiveDownload.value = "";
+          isActiveSample.value = "is-active";
+          isActiveForm.value = "";
+          break;
+        case "form":
+          isActiveDownload.value = "";
+          isActiveSample.value = "";
+          isActiveForm.value = "is-active";
+          break;
+      }
+    };
 
     const clickCreateURL = (e: any) => {
       console.log('clickCreateURL', worldUrl, identifier);
@@ -103,10 +140,15 @@ export default defineComponent({
     };
 
     return {
+      UNITYPACKAGE_URL,
       worldUrl,
       identifier,
       videoPlayerUrl,
-      clickCreateURL
+      clickCreateURL,
+      clickNav,
+      isActiveDownload,
+      isActiveSample,
+      isActiveForm
     };
   }
 });
@@ -114,18 +156,23 @@ export default defineComponent({
 
 <style scoped lang="scss">
 
-#form_container {
-  .container{
+#nav, #form_container, #sample_seen {
+  .container {
     margin: 0 auto;
     width: 600px;
   }
+}
 
+#nav {
+  ul {
+    li {
+      font-size: large;
+    }
+  }
 }
 
 #sample_seen {
   ol {
-    margin: 0 auto;
-    width: 600px;
     li {
       text-align: left;
       font-size: large;
