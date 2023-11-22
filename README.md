@@ -1,4 +1,4 @@
-# cms-count
+# WorldAccessCounter
 
 ## Project setup
 ```

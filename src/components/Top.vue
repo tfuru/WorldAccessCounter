@@ -2,7 +2,7 @@
   <div class="top">
     <section class="section">
       <div class="container">
-        <h1 class="title">cluster ワールド内アクセスカウンター</h1>
+        <h1 class="title">WorldAccessCounter</h1>
         <p class="subtitle">
           cluster ワールド内に設置できるアクセスカウンターです。 Unity製のワールドであれば、どこでも設置可能です。
         </p>        
