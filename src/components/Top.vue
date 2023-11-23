@@ -13,7 +13,7 @@
           <ul>
             <li :class="isActiveSample"><a @click="clickNav('sample')">使い方</a></li>
             <li :class="isActiveForm"><a @click="clickNav('form')">URLを生成する</a></li>
-            <li :class="isActiveDownload"><a @click="clickNav('download')">ダウンロード</a></li>
+            <li :class="isActiveDownload"><a @click="clickNav('download')">ダウンロード,ソースコード</a></li>
           </ul>
         </nav>
       </div>
@@ -21,10 +21,23 @@
 
     <section class="section" id="download_container" v-if="isActiveDownload">
       <div class="container">
-        <h1 class="title">ダウンロード</h1>
-        <p class="subtitle">
-          <a :href="UNITYPACKAGE_URL" target="_blank">AccessCounter.unitypackage</a>
-        </p>        
+        <div class="columns">
+          <div class="column">
+            <h1 class="title">ダウンロード</h1>
+            <p class="subtitle">
+              <a :href="UNITYPACKAGE_URL" target="_blank">AccessCounter.unitypackage</a>
+            </p>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <h1 class="title">ソースコード</h1>
+            <p class="subtitle">
+              <a :href="GITHUB_URL" target="_blank">{{GITHUB_URL}}</a>
+            </p>
+            <p> githubリポジトリ ソースコードやAPI仕様など</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -78,7 +91,7 @@
             <div class="field">
               <label class="label">Video Player コンポーネントに設定するURL</label>
               <div class="control">
-                <input class="input" type="text" v-model="videoPlayerUrl">
+                <input class="input" type="text" v-model="videoPlayerUrl" ref="videoPlayerUrlInput" @focus="videoPlayerUrlInput?.select()">
               </div>
             </div>
 
@@ -98,6 +111,9 @@ export default defineComponent({
     msg: String,
   },
   setup() {
+    const videoPlayerUrlInput = ref<HTMLInputElement>()
+
+    const GITHUB_URL = "https://github.com/tfuru/WorldAccessCounter";
     const UNITYPACKAGE_URL = "https://github.com/tfuru/WorldAccessCounter/raw/main/unity/AccessCounter.unitypackage";
     const COUNT_UP_API_URL = 'https://access-754xomgh3q-uc.a.run.app?worldid=[WORLDID]&identifier=[IDENTIFIER]&cmd=up';
     var worldUrl = ref('https://cluster.mu/w/2d1a38f1-9967-4b6f-994a-d00d52637a8e');
@@ -107,6 +123,7 @@ export default defineComponent({
     const isActiveSample = ref("is-active");
     const isActiveDownload = ref("");
     const isActiveForm = ref("");
+    const isActiveGithub = ref("");
 
     const clickNav = (value: string) => {
       console.log('value', value);
@@ -115,16 +132,25 @@ export default defineComponent({
           isActiveDownload.value = "is-active";
           isActiveSample.value = "";
           isActiveForm.value = "";
+          isActiveGithub.value = "";
           break;
         case "sample":
           isActiveDownload.value = "";
           isActiveSample.value = "is-active";
           isActiveForm.value = "";
+          isActiveGithub.value = "";
           break;
         case "form":
           isActiveDownload.value = "";
           isActiveSample.value = "";
           isActiveForm.value = "is-active";
+          isActiveGithub.value = "";
+          break;
+        case "github":
+          isActiveDownload.value = "";
+          isActiveSample.value = "";
+          isActiveForm.value = "";
+          isActiveGithub.value = "is-active";
           break;
       }
     };
@@ -140,15 +166,18 @@ export default defineComponent({
     };
 
     return {
+      GITHUB_URL,
       UNITYPACKAGE_URL,
       worldUrl,
       identifier,
       videoPlayerUrl,
+      videoPlayerUrlInput,
       clickCreateURL,
       clickNav,
       isActiveDownload,
       isActiveSample,
-      isActiveForm
+      isActiveForm,
+      isActiveGithub,
     };
   }
 });
