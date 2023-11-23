@@ -3,7 +3,7 @@
     <section class="section">
       <div class="container">
         <h1 class="title">WorldAccessCounter</h1>
-        <p class="subtitle">cluster ワールド内に設置できるアクセスカウンターです。 Unity製のワールドであれば設置可能です</p>        
+        <p class="subtitle">cluster ワールド内に設置できるアクセスカウンターです<br />Unity製のワールドであれば設置できます</p>        
       </div>
     </section>
 
@@ -116,7 +116,7 @@ export default defineComponent({
     const GITHUB_URL = "https://github.com/tfuru/WorldAccessCounter";
     const UNITYPACKAGE_URL = "https://github.com/tfuru/WorldAccessCounter/raw/main/unity/AccessCounter.unitypackage";
     const COUNT_UP_API_URL = 'https://access-754xomgh3q-uc.a.run.app?worldid=[WORLDID]&identifier=[IDENTIFIER]&cmd=up';
-    var worldUrl = ref('https://cluster.mu/w/2d1a38f1-9967-4b6f-994a-d00d52637a8e');
+    var worldUrl = ref('');
     var identifier = ref('');
     var videoPlayerUrl = ref('');
 
