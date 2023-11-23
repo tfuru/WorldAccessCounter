@@ -67,7 +67,7 @@
         <h1 class="title">URLを生成する</h1>
         <div class="columns">
           <div class="column">
-            <p> CountUpTrigger`を選択してInspectorにある `Video Player コンポーネント` のURL に設定する値 </p>
+            <p> CountUpTrigger`を選択してInspectorにある <br /> `Video Player コンポーネント` のURL に設定する値 </p>
 
             <div class="field">              
               <label class="label">ワールドURL</label>
