@@ -7,6 +7,16 @@
       </div>
     </section>
 
+    <section class="section">
+      <div class="container">
+        <h1 class="title">サンプルワールド</h1>
+        <p class="subtitle">
+          <a :href="WORLD_URL" target="_blank">ワールド内アクセスカウンター</a>
+        </p>
+        <p>サンプルワールドは 入室数 を表示してます</p>
+      </div>
+    </section>
+
     <section class="section" id="nav">
       <div class="container">
         <nav class="breadcrumb is-centered" aria-label="breadcrumbs">
@@ -37,7 +47,7 @@
             </p>
             <p> githubリポジトリ ソースコードやAPI仕様など</p>
           </div>
-        </div>
+        </div>        
       </div>
     </section>
 
@@ -113,6 +123,7 @@ export default defineComponent({
   setup() {
     const videoPlayerUrlInput = ref<HTMLInputElement>()
 
+    const WORLD_URL = "https://cluster.mu/w/2d1a38f1-9967-4b6f-994a-d00d52637a8e";
     const GITHUB_URL = "https://github.com/tfuru/WorldAccessCounter";
     const UNITYPACKAGE_URL = "https://github.com/tfuru/WorldAccessCounter/raw/main/unity/AccessCounter.unitypackage";
     const COUNT_UP_API_URL = 'https://access-754xomgh3q-uc.a.run.app?worldid=[WORLDID]&identifier=[IDENTIFIER]&cmd=up';
@@ -166,6 +177,7 @@ export default defineComponent({
     };
 
     return {
+      WORLD_URL,
       GITHUB_URL,
       UNITYPACKAGE_URL,
       worldUrl,
